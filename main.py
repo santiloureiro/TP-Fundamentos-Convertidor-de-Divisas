@@ -1,36 +1,39 @@
 from InquirerPy import inquirer
-import requests     
+import requests
 
+# Arma el menu de seleccion de monedas
 def elegirMoneda(items):
     return inquirer.select(message = "Ingresar moneda a cotizar: ", choices = items).execute()
 
+# Peticion de valores a dolarapi.com
 def conseguirInformacion(url):
     return requests.get(url).json()
 
-def armarUrl(url,moneda):
+# Modifica la url base para pedir diferentes valores a la api
+def armarUrl(url, moneda):
+    urlModificada = url
     if moneda == "Pesos Chilenos":
-        url = url + "/" + "cotizaciones/clp"
+        urlModificada = urlModificada + "/" + "cotizaciones/clp"
     elif moneda == "Real Brasilero":
-        url = url + "/" + "cotizaciones/brl"
+        urlModificada = urlModificada + "/" + "cotizaciones/brl"
     elif moneda == "Dolar":
-        url = url + "/" + "dolares/v1"
+        urlModificada = urlModificada + "/" + "dolares/oficial"
     elif moneda == "Peso Uruguayo":
-        url = url + "/" + "cotizaciones/uyu"
+        urlModificada = urlModificada + "/" + "cotizaciones/uyu"
     elif moneda == "Euro":
-        url = url + "/" + "cotizaciones/eur"
+        urlModificada = urlModificada + "/" + "cotizaciones/eur"
+    return urlModificada
 
+BASEURL = 'https://dolarapi.com/v1'
 
-baseUrl = 'https://dolarapi.com/v1'
-
+# Constante de monedas elegibles
 MONEDAS = ["Pesos Chilenos", "Real Brasilero", "Dolar", "Peso Uruguayo", "Euro"]
 
 userInput = elegirMoneda(MONEDAS)
 
-armarUrl(baseUrl, userInput)
+urlPeticion = armarUrl(BASEURL, userInput)
 
-print(baseUrl) 
-
-response = requests.get(baseUrl).json()
+response = requests.get(urlPeticion).json()
 
 print("Moneda ",response["moneda"])
 print("Casa ",response["casa"])
