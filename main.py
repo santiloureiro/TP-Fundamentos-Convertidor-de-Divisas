@@ -3,41 +3,51 @@ import requests
 
 # Arma el menu de seleccion de monedas
 def elegirMoneda(items):
-    return inquirer.select(message = "Ingresar moneda a cotizar: ", choices = items).execute()
+    return inquirer.select(message = "Elegir moneda para la cotizacion: ", choices = items).execute()
 
 # Peticion de valores a dolarapi.com
-def conseguirInformacion(url):
-    return requests.get(url).json()
+def conseguirValoresDesdeAPI(url):
+    solicitudDatos = requests.get(url)
+    return solicitudDatos.json()
 
-# Modifica la url base para pedir diferentes valores a la api
+# Modifica la url base para pedir diferentes informacion a la api
 def armarUrl(url, moneda):
     urlModificada = url
     if moneda == "Pesos Chilenos":
-        urlModificada = urlModificada + "/" + "cotizaciones/clp"
+        urlModificada = urlModificada + "cotizaciones/clp"
     elif moneda == "Real Brasilero":
-        urlModificada = urlModificada + "/" + "cotizaciones/brl"
+        urlModificada = urlModificada + "cotizaciones/brl"
     elif moneda == "Dolar":
-        urlModificada = urlModificada + "/" + "dolares/oficial"
+        urlModificada = urlModificada + "dolares/oficial"
     elif moneda == "Peso Uruguayo":
-        urlModificada = urlModificada + "/" + "cotizaciones/uyu"
+        urlModificada = urlModificada + "cotizaciones/uyu"
     elif moneda == "Euro":
-        urlModificada = urlModificada + "/" + "cotizaciones/eur"
+        urlModificada = urlModificada + "cotizaciones/eur"
     return urlModificada
 
-BASEURL = 'https://dolarapi.com/v1'
+URLBASE = 'https://dolarapi.com/v1/'
 
 # Constante de monedas elegibles
 MONEDAS = ["Pesos Chilenos", "Real Brasilero", "Dolar", "Peso Uruguayo", "Euro"]
 
+cantidadAConvertir = int(input("Ingresar cantidad de ARS$: "))
+
 userInput = elegirMoneda(MONEDAS)
 
-urlPeticion = armarUrl(BASEURL, userInput)
+urlPeticion = armarUrl(URLBASE, userInput)
 
-response = requests.get(urlPeticion).json()
+print("Cargando valores...")
+datosFormateados = conseguirValoresDesdeAPI(urlPeticion)
 
-print("Moneda ",response["moneda"])
-print("Casa ",response["casa"])
-print("Nombre ",response["nombre"])
-print("Compra " ,response["compra"])
-print("Venta ", response["venta"])
-print("Ultima actualizacion: " ,response["fechaActualizacion"])
+valoresCompra = round(cantidadAConvertir / datosFormateados["compra"], 2)
+valoresVenta = round(cantidadAConvertir / datosFormateados["venta"], 2)
+
+print("---------------------Tabla de valores---------------------")
+print("Moneda:",datosFormateados["moneda"])
+print("Nombre: ",datosFormateados["nombre"])
+print("Compra: ",round(datosFormateados["compra"],2))
+print("Venta: ",round(datosFormateados["venta"],2))
+print("Ultima actualizacion: " ,datosFormateados["fechaActualizacion"])
+print()
+print("Cantidad ingresada: ","ARS$", cantidadAConvertir)
+print("Con esa cantidad se pueden comprar: ", datosFormateados["moneda"], valoresVenta)
