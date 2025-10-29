@@ -1,3 +1,5 @@
+# Cosas a agregar: Registro o log de usuarios y feedback, interfaz grafica, programa para visualizar el feedback y uso de los usuarios 
+
 from InquirerPy import inquirer
 import requests
 
@@ -5,7 +7,7 @@ import requests
 def elegirMoneda(items):
     return inquirer.select(message = "Elegir moneda para la cotizacion: ", choices = items).execute()
 
-# Peticion de valores a dolarapi.com
+# Peticion a url 
 def conseguirValoresDesdeAPI(url):
     solicitudDatos = requests.get(url)
     return solicitudDatos.json()
@@ -27,7 +29,7 @@ def armarUrl(url, moneda):
 
 URLBASE = 'https://dolarapi.com/v1/'
 
-# Constante de monedas elegibles
+# Lista de monedas elegibles
 MONEDAS = ["Pesos Chilenos", "Real Brasilero", "Dolar", "Peso Uruguayo", "Euro"]
 
 cantidadAConvertir = int(input("Ingresar cantidad de ARS$: "))
