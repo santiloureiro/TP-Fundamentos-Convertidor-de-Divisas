@@ -1,3 +1,3 @@
 # Convertidor de Divisas
 
-Librerias utilizadas: requests, InquirerPy
+Librerias utilizadas: requests, InquirerPy, Path, csv

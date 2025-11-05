@@ -4,7 +4,7 @@ import requests
 import csv
 from pathlib import Path
 
-# FUNCIONES PARA LISTA DE USUARIOS
+# * FUNCIONES PARA LISTA DE USUARIOS
 
 # Crea el archivo CSV de usuarios
 def inicializarListaUsuarios(infoUsuario,archivo):
@@ -19,7 +19,7 @@ def añadirUsuario(infoUsuario, archivo):
         escritorCsv = csv.writer(archivoUsuarios,lineterminator="\n")
         escritorCsv.writerow(infoUsuario)
 
-# FUNCIONES PARA EL COTIZADOR
+# * FUNCIONES PARA EL COTIZADOR
 
 # Arma el menu de seleccion de monedas
 def elegirMoneda(items):
