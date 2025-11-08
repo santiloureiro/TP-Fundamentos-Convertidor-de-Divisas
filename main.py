@@ -2,6 +2,7 @@
 from InquirerPy import inquirer
 import requests
 import csv
+from tabulate import tabulate
 from pathlib import Path
 
 # * FUNCIONES PARA LISTA DE USUARIOS
@@ -29,6 +30,28 @@ def elegirOperacion(titulo,items):
 def conseguirValoresDesdeAPI(url):
     solicitudDatos = requests.get(url)
     return solicitudDatos.json()
+
+def obtenerListaDeCSV(archivo):
+    listaObtenida = []
+    with open(archivo, 'r', newline='') as archivoUsuarios:
+        lectorCsv = csv.reader(archivoUsuarios)
+        for fila in lectorCsv:
+            listaObtenida.append(fila)
+    return(listaObtenida)
+
+def conseguirMayorCotizacion(listaDeUsuarios):
+    mayorUsuario = listaDeUsuarios[0]
+    for usuario in listaDeUsuarios:
+        if(int(usuario[2]) > int(mayorUsuario[2])):
+            mayorUsuario = usuario
+    return(mayorUsuario)
+
+def obtenerListaSinTitulos(lista):
+    listaLimpia = []
+    for i in range(len(lista) - 1):
+        i = i + 1
+        listaLimpia.append(lista[i])
+    return(listaLimpia)
 
 # Modifica la url base para pedir diferentes informacion a la api
 def armarUrl(url, moneda):
@@ -92,4 +115,23 @@ else:
     if not LISTAUSUARIOS.exists():
         print("No hay ningun usuario registrado!")
     else:
+        # Arma el menu de operaciones de analisis de informacion de usuarios
         analisisElegido = elegirOperacion("Que informacion queres ver?", ["Mayor Conversion", "Lista de usuarios"])
+        listaDeUsuarios = obtenerListaDeCSV(LISTAUSUARIOS)
+        
+        # Se separan los titulos del csv de la informacion de usuarios
+        titulos = listaDeUsuarios[0]
+        datosDeUsuarios = obtenerListaSinTitulos(listaDeUsuarios)
+
+        # Se retorna la informacion dependiendo de la operacion elegida
+        if analisisElegido == "Mayor Conversion":
+            mayorCotizacion = conseguirMayorCotizacion(datosDeUsuarios)
+            print("El usuario que mas convirtio fue:", mayorCotizacion[0], end=", ")
+            print("opero en:", mayorCotizacion[1], end=", ")
+            print("para convertir $ARS",mayorCotizacion[2], end=" y ")
+            print("el resultado de la conversion fue $",mayorCotizacion[1], mayorCotizacion[3])
+        if analisisElegido == "Lista de usuarios":
+            print(tabulate(datosDeUsuarios, headers=titulos, tablefmt="grid"))
+
+
+
