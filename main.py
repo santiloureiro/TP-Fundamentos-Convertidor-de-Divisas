@@ -21,9 +21,9 @@ def añadirUsuario(infoUsuario, archivo):
 
 # * FUNCIONES PARA EL COTIZADOR
 
-# Arma el menu de seleccion de monedas
-def elegirMoneda(items):
-    return inquirer.select(message = "Elegir moneda para la cotizacion: ", choices = items).execute()
+# Arma los menues de seleccion
+def elegirOperacion(titulo,items):
+    return inquirer.select(message = titulo, choices = items).execute()
 
 # Peticion a url 
 def conseguirValoresDesdeAPI(url):
@@ -51,31 +51,45 @@ LISTAUSUARIOS = Path('usuarios.csv')
 
 # Lista de monedas elegibles
 MONEDAS = ["Pesos Chilenos", "Real Brasilero", "Dolar", "Peso Uruguayo", "Euro"]
-nombreUsuario = input("Ingresa tu nombre: ")
-cantidadAConvertir = int(input("Ingresar cantidad de ARS$: "))
 
-userInput = elegirMoneda(MONEDAS)
+operacion = elegirOperacion("Elegir operacion: ", ["Convertir", "Analisis de usuarios"])
 
-urlPeticion = armarUrl(URLBASE, userInput)
+if operacion == "Convertir" :
+    nombreUsuario = input("Ingresa tu nombre: ")
 
-print("Cargando valores...")
-datosFormateados = conseguirValoresDesdeAPI(urlPeticion)
-valoresCompra = round(cantidadAConvertir / datosFormateados["compra"], 2)
-valoresVenta = round(cantidadAConvertir / datosFormateados["venta"], 2)
-datosUsuario = [nombreUsuario, datosFormateados["moneda"],cantidadAConvertir,valoresVenta,datosFormateados["fechaActualizacion"]]
-print("---------------------Tabla de valores---------------------")
-print("Moneda:",datosFormateados["moneda"])
-print("Nombre: ",datosFormateados["nombre"])
-print("Compra: ",round(datosFormateados["compra"],2))
-print("Venta: ",round(datosFormateados["venta"],2))
-print("Ultima actualizacion: " ,datosFormateados["fechaActualizacion"])
-print()
-print("Cantidad ingresada: ","ARS$", cantidadAConvertir)
-print("Con esa cantidad se pueden comprar: ", datosFormateados["moneda"], valoresVenta)
+    cantidadAConvertir = int(input("Ingresar cantidad de ARS$: "))
 
-# Checkea si el archivo de usuarios no existe y crea el archivo
-if not LISTAUSUARIOS.exists():   
-    inicializarListaUsuarios(datosUsuario, LISTAUSUARIOS)
-# Añade a la lista si el archivo existe
+    while cantidadAConvertir < 0 : 
+        cantidadAConvertir = int(input("Ingresar una cantidad valida de ARS$: "))
+
+
+    userInput = elegirOperacion("Elegir moneda para la cotizacion: ",MONEDAS)
+
+    urlPeticion = armarUrl(URLBASE, userInput)
+
+    print("Cargando valores...")
+    datosFormateados = conseguirValoresDesdeAPI(urlPeticion)
+    valoresCompra = round(cantidadAConvertir / datosFormateados["compra"], 2)
+    valoresVenta = round(cantidadAConvertir / datosFormateados["venta"], 2)
+    datosUsuario = [nombreUsuario, datosFormateados["moneda"],cantidadAConvertir,valoresVenta,datosFormateados["fechaActualizacion"]]
+    print("---------------------Tabla de valores---------------------")
+    print("Moneda:",datosFormateados["moneda"])
+    print("Nombre: ",datosFormateados["nombre"])
+    print("Compra: ",round(datosFormateados["compra"],2))
+    print("Venta: ",round(datosFormateados["venta"],2))
+    print("Ultima actualizacion: " ,datosFormateados["fechaActualizacion"])
+    print()
+    print("Cantidad ingresada: ","ARS$", cantidadAConvertir)
+    print("Con esa cantidad se pueden comprar: ", datosFormateados["moneda"], valoresVenta)
+
+    # Checkea si el archivo de usuarios no existe y crea el archivo
+    if not LISTAUSUARIOS.exists():   
+        inicializarListaUsuarios(datosUsuario, LISTAUSUARIOS)
+    # Añade a la lista si el archivo existe
+    else:
+        añadirUsuario(datosUsuario, LISTAUSUARIOS)
 else:
-    añadirUsuario(datosUsuario, LISTAUSUARIOS)
+    if not LISTAUSUARIOS.exists():
+        print("No hay ningun usuario registrado!")
+    else:
+        analisisElegido = elegirOperacion("Que informacion queres ver?", ["Mayor Conversion", "Lista de usuarios"])
