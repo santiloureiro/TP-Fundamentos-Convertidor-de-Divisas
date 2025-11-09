@@ -1,4 +1,5 @@
-# Cosas a agregar: Registro o log de usuarios y feedback, interfaz grafica, programa para visualizar el feedback y uso de los usuarios 
+# * Instalar librerias desde pip:  InquirerPy, requests y tabulate
+
 from InquirerPy import inquirer
 import requests
 import csv
@@ -138,6 +139,3 @@ else:
             print("el resultado de la conversion fue $",mayorCotizacion[1], mayorCotizacion[3])
         if analisisElegido == "Lista de usuarios":
             print(tabulate(datosDeUsuarios, headers=titulos, tablefmt="grid"))
-
-
-
