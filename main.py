@@ -29,7 +29,7 @@ def elegirOperacion(titulo,items):
 # Peticion a url 
 def conseguirValoresDesdeAPI(url):
     solicitudDatos = requests.get(url)
-    return solicitudDatos.json()
+    return solicitudDatos
 
 def obtenerListaDeCSV(archivo):
     listaObtenida = []
@@ -42,7 +42,7 @@ def obtenerListaDeCSV(archivo):
 def conseguirMayorCotizacion(listaDeUsuarios):
     mayorUsuario = listaDeUsuarios[0]
     for usuario in listaDeUsuarios:
-        if(int(usuario[2]) > int(mayorUsuario[2])):
+        if(float(usuario[2]) > float(mayorUsuario[2])):
             mayorUsuario = usuario
     return(mayorUsuario)
 
@@ -80,10 +80,10 @@ operacion = elegirOperacion("Elegir operacion: ", ["Convertir", "Analisis de usu
 if operacion == "Convertir" :
     nombreUsuario = input("Ingresa tu nombre: ")
 
-    cantidadAConvertir = int(input("Ingresar cantidad de ARS$: "))
+    cantidadAConvertir = float(input("Ingresar cantidad de ARS$: "))
 
     while cantidadAConvertir < 0 : 
-        cantidadAConvertir = int(input("Ingresar una cantidad valida de ARS$: "))
+        cantidadAConvertir = float(input("Ingresar una cantidad valida de ARS$: "))
 
 
     userInput = elegirOperacion("Elegir moneda para la cotizacion: ",MONEDAS)
@@ -91,26 +91,32 @@ if operacion == "Convertir" :
     urlPeticion = armarUrl(URLBASE, userInput)
 
     print("Cargando valores...")
-    datosFormateados = conseguirValoresDesdeAPI(urlPeticion)
-    valoresCompra = round(cantidadAConvertir / datosFormateados["compra"], 2)
-    valoresVenta = round(cantidadAConvertir / datosFormateados["venta"], 2)
-    datosUsuario = [nombreUsuario, datosFormateados["moneda"],cantidadAConvertir,valoresVenta,datosFormateados["fechaActualizacion"]]
-    print("---------------------Tabla de valores---------------------")
-    print("Moneda:",datosFormateados["moneda"])
-    print("Nombre: ",datosFormateados["nombre"])
-    print("Compra: ",round(datosFormateados["compra"],2))
-    print("Venta: ",round(datosFormateados["venta"],2))
-    print("Ultima actualizacion: " ,datosFormateados["fechaActualizacion"])
-    print()
-    print("Cantidad ingresada: ","ARS$", cantidadAConvertir)
-    print("Con esa cantidad se pueden comprar: ", datosFormateados["moneda"], valoresVenta)
 
-    # Checkea si el archivo de usuarios no existe y crea el archivo
-    if not LISTAUSUARIOS.exists():   
-        inicializarListaUsuarios(datosUsuario, LISTAUSUARIOS)
-    # Añade a la lista si el archivo existe
+    peticionAPI = conseguirValoresDesdeAPI(urlPeticion)
+    statusPeticion = peticionAPI.status_code
+    if statusPeticion == 200:
+        datosFormateados = peticionAPI.json()
+        valoresCompra = round(cantidadAConvertir / datosFormateados["compra"], 2)
+        valoresVenta = round(cantidadAConvertir / datosFormateados["venta"], 2)
+        datosUsuario = [nombreUsuario, datosFormateados["moneda"],cantidadAConvertir,valoresVenta,datosFormateados["fechaActualizacion"]]
+        print("---------------------Tabla de valores---------------------")
+        print("Moneda:",datosFormateados["moneda"])
+        print("Nombre: ",datosFormateados["nombre"])
+        print("Compra: ",round(datosFormateados["compra"],2))
+        print("Venta: ",round(datosFormateados["venta"],2))
+        print("Ultima actualizacion: " ,datosFormateados["fechaActualizacion"])
+        print()
+        print("Cantidad ingresada: ","ARS$", cantidadAConvertir)
+        print("Con esa cantidad se pueden comprar: ", datosFormateados["moneda"], valoresVenta)
+
+        # Checkea si el archivo de usuarios no existe y crea el archivo
+        if not LISTAUSUARIOS.exists():   
+            inicializarListaUsuarios(datosUsuario, LISTAUSUARIOS)
+        # Añade a la lista si el archivo existe
+        else:
+            añadirUsuario(datosUsuario, LISTAUSUARIOS)
     else:
-        añadirUsuario(datosUsuario, LISTAUSUARIOS)
+        print("Error en la peticion! | Codigo de status: ", statusPeticion)
 else:
     if not LISTAUSUARIOS.exists():
         print("No hay ningun usuario registrado!")
